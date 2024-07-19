@@ -25,6 +25,7 @@ def handle_client(client_socket,addr):
     username=client_socket.recv(1024).decode('utf-8')
     clients.append(client_socket)
     users[client_socket]=username
+    broadcast(f'{username} joined chat',client_socket)
     try:
         while True:
             request=client_socket.recv(1024).decode('utf-8')
