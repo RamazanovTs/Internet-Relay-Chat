@@ -1,0 +1,170 @@
+import socket
+import threading
+import tkinter as tk
+from tkinter import scrolledtext, messagebox
+import time
+
+
+def run_client():
+    global client, username, userlist
+    try:
+        ip = ip_entry.get()
+        if not ip:
+            raise ValueError("IP address cannot be empty")
+
+        port = int(port_entry.get())
+        if not port:
+            raise ValueError("Port number cannot be empty")
+
+        username = name_entry.get()
+        if not username:
+            raise ValueError("Username cannot be empty")
+
+        if check_connection():
+            show_alert('You are already in the server', 'red')
+        else:
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect((ip, port))
+            show_alert(f'Successfully Connected to {ip}:{port}', 'green')
+            client.send(username.encode('utf-8'))
+
+            threading.Thread(target=receive_message, daemon=True).start()
+            threading.Thread(target=update_users, daemon=True).start()
+
+    except ValueError as ve:
+        messagebox.showwarning("Input Error", str(ve))
+    except socket.error as se:
+        messagebox.showerror("Connection Error", f"Socket error: {se}")
+    except Exception as e:
+        messagebox.showerror("Connection Error", f"Unable to connect to the server: {e}")
+
+
+def send_message():
+    if check_connection():
+        message = message_entry.get()
+        message_entry.delete(0, tk.END)
+        if message:
+            try:
+                client.send(message.encode('utf-8'))
+                if message.lower() == 'exit':
+                    client.close()
+                    root.quit()
+                update_chat_display(f'{username}: {message}\n')
+            except Exception as e:
+                update_chat_display(f"Error sending message: {e}\n")
+    else:
+        show_alert('You are not in a server', 'red')
+
+
+def receive_message():
+    while True:
+        try:
+            message = client.recv(1024).decode('utf-8')
+            if message:
+                if message.startswith('ul'):
+                    global userlist
+                    userlist = eval(message[2:])
+                else:
+                    update_chat_display(f"{message}\n")
+            else:
+                break
+        except Exception as e:
+            print(f"Error receiving message: {e}")
+            break
+
+
+def update_users():
+    while True:
+        if check_connection():
+            root.after(0, update_online_users)
+        time.sleep(5)
+
+
+def update_chat_display(message):
+    chat_display.config(state='normal')
+    chat_display.insert(tk.END, message)
+    chat_display.config(state='disabled')
+    chat_display.yview(tk.END)
+
+
+def update_online_users():
+    online_users.config(state='normal')
+    online_users.delete('1.0', tk.END)
+    if check_connection():
+        for user in userlist:
+            online_users.insert(tk.END, f"{user}\n")
+    online_users.config(state='disabled')
+    online_users.yview(tk.END)
+
+
+def show_alert(message, color):
+    alert_label = tk.Label(root, text=message, fg=color, font=('Helvetica', 12, 'bold'))
+    alert_label.grid(row=2, column=0, columnspan=2)
+    root.after(3000, alert_label.destroy)
+
+
+def check_connection():
+    try:
+        client.send('usercheck'.encode('utf-8'))
+        return True
+    except:
+        return False
+
+
+def disconnect():
+    if check_connection():
+        client.send('close'.encode('utf-8'))
+        client.close()
+        show_alert('Successfully Disconnected', 'red')
+        update_online_users()
+        chat_display.config(state='normal')
+        chat_display.delete('1.0',tk.END )
+        chat_display.config(state='disabled')
+        chat_display.yview(tk.END)
+    else:
+        show_alert('You are not in a server', 'red')
+
+
+root = tk.Tk()
+root.title('IRC Client')
+
+chat_display = scrolledtext.ScrolledText(root, state='disabled', wrap='word')
+chat_display.grid(row=0, column=1, columnspan=2, padx=10, pady=10)
+
+online_users = scrolledtext.ScrolledText(root, state='disabled', wrap='word', width=20)
+online_users.grid(row=0, column=3, columnspan=1, padx=2, pady=2)
+
+message_entry = tk.Entry(root, width=50)
+message_entry.grid(row=1, column=1, padx=10, pady=10)
+
+send_button = tk.Button(root, text="Send", command=send_message)
+send_button.grid(row=1, column=2, padx=10, pady=10)
+
+frame = tk.Frame(root)
+frame.grid(row=0, column=0)
+
+name_label = tk.Label(frame, text='Username')
+name_label.grid(row=0, column=0, padx=5, pady=2)
+
+name_entry = tk.Entry(frame, width=20)
+name_entry.grid(row=1, column=0, padx=5, pady=2)
+
+ip_label = tk.Label(frame, text='IP')
+ip_label.grid(row=2, column=0, padx=5, pady=2)
+
+ip_entry = tk.Entry(frame, width=20)
+ip_entry.grid(row=3, column=0, padx=5, pady=2)
+
+port_label = tk.Label(frame, text='Port')
+port_label.grid(row=4, column=0, padx=5, pady=2)
+
+port_entry = tk.Entry(frame, width=20)
+port_entry.grid(row=5, column=0, padx=5, pady=2)
+
+connect_button = tk.Button(frame, text='Connect', command=run_client)
+connect_button.grid(row=6, column=0, padx=5, pady=2)
+
+disconnect_button = tk.Button(frame, text='Disconnect', command=disconnect)
+disconnect_button.grid(row=7, column=0, padx=5, pady=2)
+
+root.mainloop()

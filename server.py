@@ -6,7 +6,7 @@ clients=[]
 users={}
 
 def run_server():
-    ip='your ip'
+    ip=''
     port='your port'#without quotation marks
     server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     server.bind((ip,port))
