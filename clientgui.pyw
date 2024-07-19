@@ -3,6 +3,7 @@ import threading
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
 import time
+import customtkinter
 
 
 def run_client():
@@ -125,8 +126,9 @@ def disconnect():
         show_alert('You are not in a server', 'red')
 
 
-root = tk.Tk()
+root = customtkinter.CTk()
 root.title('IRC Client')
+
 
 chat_display = scrolledtext.ScrolledText(root, state='disabled', wrap='word')
 chat_display.grid(row=0, column=1, columnspan=2, padx=10, pady=10)
@@ -134,37 +136,37 @@ chat_display.grid(row=0, column=1, columnspan=2, padx=10, pady=10)
 online_users = scrolledtext.ScrolledText(root, state='disabled', wrap='word', width=20)
 online_users.grid(row=0, column=3, columnspan=1, padx=2, pady=2)
 
-message_entry = tk.Entry(root, width=50)
+message_entry = customtkinter.CTkEntry(root, width=500)
 message_entry.grid(row=1, column=1, padx=10, pady=10)
 
-send_button = tk.Button(root, text="Send", command=send_message)
+send_button = customtkinter.CTkButton(root, text="Send", command=send_message)
 send_button.grid(row=1, column=2, padx=10, pady=10)
 
-frame = tk.Frame(root)
-frame.grid(row=0, column=0)
+frame = customtkinter.CTkFrame(root)
+frame.grid(row=0, column=0,padx=10)
 
-name_label = tk.Label(frame, text='Username')
-name_label.grid(row=0, column=0, padx=5, pady=2)
+name_label = customtkinter.CTkLabel(frame, text='Username')
+name_label.grid(row=0, column=0, padx=5, pady=5)
 
-name_entry = tk.Entry(frame, width=20)
-name_entry.grid(row=1, column=0, padx=5, pady=2)
+name_entry = customtkinter.CTkEntry(frame, width=150)
+name_entry.grid(row=1, column=0, padx=5, pady=5)
 
-ip_label = tk.Label(frame, text='IP')
-ip_label.grid(row=2, column=0, padx=5, pady=2)
+ip_label = customtkinter.CTkLabel(frame, text='IP')
+ip_label.grid(row=2, column=0, padx=5, pady=5)
 
-ip_entry = tk.Entry(frame, width=20)
-ip_entry.grid(row=3, column=0, padx=5, pady=2)
+ip_entry = customtkinter.CTkEntry(frame, width=150)
+ip_entry.grid(row=3, column=0, padx=5, pady=5)
 
-port_label = tk.Label(frame, text='Port')
-port_label.grid(row=4, column=0, padx=5, pady=2)
+port_label = customtkinter.CTkLabel(frame, text='Port')
+port_label.grid(row=4, column=0, padx=5, pady=5)
 
-port_entry = tk.Entry(frame, width=20)
-port_entry.grid(row=5, column=0, padx=5, pady=2)
+port_entry = customtkinter.CTkEntry(frame, width=150)
+port_entry.grid(row=5, column=0, padx=5, pady=5)
 
-connect_button = tk.Button(frame, text='Connect', command=run_client)
-connect_button.grid(row=6, column=0, padx=5, pady=2)
+connect_button = customtkinter.CTkButton(frame, text='Connect', command=run_client)
+connect_button.grid(row=6, column=0, padx=5, pady=5)
 
-disconnect_button = tk.Button(frame, text='Disconnect', command=disconnect)
-disconnect_button.grid(row=7, column=0, padx=5, pady=2)
+disconnect_button = customtkinter.CTkButton(frame, text='Disconnect', command=disconnect)
+disconnect_button.grid(row=7, column=0, padx=5, pady=5)
 
 root.mainloop()
