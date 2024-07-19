@@ -6,6 +6,16 @@ import time
 import customtkinter
 
 
+#Todo list
+#add connection bar
+#add user counter
+#message timestamps
+#emoji support
+#file support
+#customizable themes
+#private messages
+
+
 def run_client():
     global client, username, userlist
     try:
